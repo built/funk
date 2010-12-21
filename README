@@ -1,0 +1,17 @@
+"Oh how the funk lingers..." - George Clinton
+
+funk helps you find dead or orphaned functions in your ruby code
+
+You'll need ack installed or you'll get yelled at.
+
+Usage: funk <source file> <project folder>
+
+It works like this:
+
+funk /projects/foo/app/models/account.rb /projects/foo
+
+It spits out the name of any functions that it can't find used in your project directory
+
+Funk is not 100% accurate. Your brain is still required. (Sorry!)
+
+

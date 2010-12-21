@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+unless ARGV.length == 2
+  puts "Usage: funk <source file> <project folder>"
+  exit 1
+end
+
+unless `which ack`.split("\n").count > 0
+  puts "You need ack to feel the funk, baby!"
+  exit 1
+end
+
+@filename = ARGV[0]
+@codebase = ARGV[1]
+
+unless File.exists? @filename
+  puts "File not found: #{@filename}"
+end
+
+def used_in_codebase? methodname
+  minimum_count = 1
+  if methodname.include? "." # Class methods may look different
+    minimum_count = 0
+  end
+    
+  `ack #{methodname} #{@codebase}`.split("\n").count > minimum_count
+end
+
+FUNCTION_DECLARATION = /^\s+def\s+([\w?!=\.]*)/
+CLASS_DECLARATION = /^\s*class\s+([\w]*)/
+
+@current_class = ""
+@unused_code_found = false
+
+File.open(@filename, "r") do |source_file|
+  source_file.each_line do |line|
+    if line =~ FUNCTION_DECLARATION
+      function_name = $1.gsub("self.", "#{@current_class}.")
+      unless used_in_codebase? function_name
+        puts "#{function_name}"
+        @unused_code_found = true
+      end
+    elsif line =~ CLASS_DECLARATION
+      @current_class = $1
+    end
+  end
+end
+
+warn "No unused code was found" unless @unused_code_found
+exit 0
+
